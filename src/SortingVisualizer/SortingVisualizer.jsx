@@ -1,18 +1,15 @@
 import React from 'react';
-import {getMergeSortAnimations} from '../sortingAlgorithms/sortingAlgorithms.js';
 import './SortingVisualizer.css';
+import { getQuickSortAnimations } from '../sortingAlgorithms/quickSort';
+import { getBubbleSortAnimations } from '../sortingAlgorithms/bubbleSort';
+import { getHeapSortAnimations } from '../sortingAlgorithms/heapSort';
+import { getMergeSortAnimations } from '../sortingAlgorithms/mergeSort';
 
-// Change this value for the speed of the animations.
-const ANIMATION_SPEED_MS = 1;
 
-// Change this value for the number of bars (value) in the array.
-const NUMBER_OF_ARRAY_BARS = 310;
-
-// This is the main color of the array bars.
+const ANIMATION_SPEED_MS = 3;
 const PRIMARY_COLOR = 'turquoise';
-
-// This is the color of array bars that are being compared throughout the animations.
 const SECONDARY_COLOR = 'red';
+const MAX_BAR_HEIGHT = 500; // Maximum height for the bars in pixels
 
 export default class SortingVisualizer extends React.Component {
   constructor(props) {
@@ -20,7 +17,10 @@ export default class SortingVisualizer extends React.Component {
 
     this.state = {
       array: [],
+      numberOfArrayBars: 100, // Initial number of array bars
     };
+
+    this.handleSliderChange = this.handleSliderChange.bind(this);
   }
 
   componentDidMount() {
@@ -29,66 +29,72 @@ export default class SortingVisualizer extends React.Component {
 
   resetArray() {
     const array = [];
-    for (let i = 0; i < NUMBER_OF_ARRAY_BARS; i++) {
-      array.push(randomIntFromInterval(5, 730));
+    for (let i = 0; i < this.state.numberOfArrayBars; i++) {
+      array.push(randomIntFromInterval(5, MAX_BAR_HEIGHT));
     }
-    this.setState({array});
+    this.setState({ array });
+  }
+
+  handleSliderChange(event) {
+    this.setState({ numberOfArrayBars: parseInt(event.target.value, 10) }, () => {
+      this.resetArray(); // Reset the array after updating the number of bars
+    });
   }
 
   mergeSort() {
     const animations = getMergeSortAnimations(this.state.array);
-    for (let i = 0; i < animations.length; i++) {
-      const arrayBars = document.getElementsByClassName('array-bar');
-      const isColorChange = i % 3 !== 2;
-      if (isColorChange) {
-        const [barOneIdx, barTwoIdx] = animations[i];
-        const barOneStyle = arrayBars[barOneIdx].style;
-        const barTwoStyle = arrayBars[barTwoIdx].style;
-        const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
-        setTimeout(() => {
-          barOneStyle.backgroundColor = color;
-          barTwoStyle.backgroundColor = color;
-        }, i * ANIMATION_SPEED_MS);
-      } else {
-        setTimeout(() => {
-          const [barOneIdx, newHeight] = animations[i];
-          const barOneStyle = arrayBars[barOneIdx].style;
-          barOneStyle.height = `${newHeight}px`;
-        }, i * ANIMATION_SPEED_MS);
-      }
-    }
+    this.animateSorting(animations);
   }
 
   quickSort() {
-    // We leave it as an exercise to the viewer of this code to implement this method.
+    const animations = getQuickSortAnimations(this.state.array);
+    this.animateSorting(animations);
   }
 
   heapSort() {
-    // We leave it as an exercise to the viewer of this code to implement this method.
+    const animations = getHeapSortAnimations(this.state.array);
+    this.animateSorting(animations);
   }
 
   bubbleSort() {
-    // We leave it as an exercise to the viewer of this code to implement this method.
+    const animations = getBubbleSortAnimations(this.state.array);
+    this.animateSorting(animations);
   }
 
-  // NOTE: This method will only work if your sorting algorithms actually return
-  // the sorted arrays; if they return the animations (as they currently do), then
-  // this method will be broken.
-  testSortingAlgorithms() {
-    for (let i = 0; i < 100; i++) {
-      const array = [];
-      const length = randomIntFromInterval(1, 1000);
-      for (let i = 0; i < length; i++) {
-        array.push(randomIntFromInterval(-1000, 1000));
-      }
-      const javaScriptSortedArray = array.slice().sort((a, b) => a - b);
-      const mergeSortedArray = getMergeSortAnimations(array.slice());
-      console.log(arraysAreEqual(javaScriptSortedArray, mergeSortedArray));
+  animateSorting(animations) {
+    const arrayBars = document.getElementsByClassName('array-bar');
+    for (let i = 0; i < animations.length; i++) {
+        const isColorChange = i % 3 !== 2;
+        if (isColorChange) {
+            const [barOneIdx, barTwoIdx] = animations[i];
+            const barOneStyle = arrayBars[barOneIdx].style;
+            const barTwoStyle = arrayBars[barTwoIdx].style;
+            const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
+            setTimeout(() => {
+                barOneStyle.backgroundColor = color;
+                barTwoStyle.backgroundColor = color;
+            }, i * ANIMATION_SPEED_MS);
+        } else {
+            setTimeout(() => {
+                const [barOneIdx, newHeight] = animations[i];
+                if (barOneIdx < 0 || barOneIdx >= arrayBars.length) {
+                    console.error('Invalid bar index:', barOneIdx);
+                    return; // Exit this animation
+                }
+                const barOneStyle = arrayBars[barOneIdx].style;
+                barOneStyle.height = `${newHeight}px`;
+            }, i * ANIMATION_SPEED_MS);
+        }
     }
-  }
+}
+
 
   render() {
-    const {array} = this.state;
+    const { array, numberOfArrayBars } = this.state;
+
+    // Calculate the maximum value in the array for scaling
+    const maxValue = Math.max(...array);
+    const barWidth = Math.max(1, 100 / numberOfArrayBars) + "%"; // Calculate bar width based on the number of bars
 
     return (
       <div className="array-container">
@@ -98,25 +104,30 @@ export default class SortingVisualizer extends React.Component {
             key={idx}
             style={{
               backgroundColor: PRIMARY_COLOR,
-              height: `${value}px`,
+              height: `${(value / maxValue) * MAX_BAR_HEIGHT}px`, // Scale the height
+              width: `${barWidth}`, // Set the width
             }}></div>
         ))}
-        <button onClick={() => this.resetArray()}>Generate New Array</button>
-        <button onClick={() => this.mergeSort()}>Merge Sort</button>
-        <button onClick={() => this.quickSort()}>Quick Sort</button>
-        <button onClick={() => this.heapSort()}>Heap Sort</button>
-        <button onClick={() => this.bubbleSort()}>Bubble Sort</button>
-        <button onClick={() => this.testSortingAlgorithms()}>
-          Test Sorting Algorithms (BROKEN)
-        </button>
+        <div className="controls-container">
+          <button onClick={() => this.resetArray()}>Generate New Array</button>
+          <button onClick={() => this.mergeSort()}>Merge Sort</button>
+          <button onClick={() => this.quickSort()}>Quick Sort</button>
+          <button onClick={() => this.heapSort()}>Heap Sort</button>
+          <button onClick={() => this.bubbleSort()}>Bubble Sort</button>
+          <input
+            type="range"
+            min="10"
+            max="1000"
+            value={numberOfArrayBars}
+            onChange={this.handleSliderChange}
+          />
+        </div>
       </div>
     );
   }
 }
 
-// From https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
 function randomIntFromInterval(min, max) {
-  // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 

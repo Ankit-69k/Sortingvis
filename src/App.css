@@ -1,22 +1,39 @@
-.App {
-  text-align: center;
+/* App.css */
+
+/* Reset some default styling for a cleaner look */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-}
-
-.App-header {
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: #282c34;
-  min-height: 100vh;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+}
+
+/* Container for the entire application */
+.app-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-top: 30px;
+  width: 100%;
 }
 
-.App-link {
-  color: #09d3ac;
+/* Header styles */
+.app-header {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.vis{
+  max-width: 90vw;
 }

@@ -1,11 +1,70 @@
+/* SortingVisualizer.css */
+
+/* General styles */
+
+
 .array-container {
-  position: absolute;
-  left: 100px;
-  /* top: 100px; */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 95vw; /* Take up 90% of viewport width */
+  max-height: 80vh;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #fff;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.array-bars-container {
+  width: 80%; /* Take up 80% of the .array-container */
+  display: flex;
+  align-items: flex-end;
 }
 
 .array-bar {
-  width: 2px;
-  display: inline-block;
+  background-color: turquoise;
   margin: 0 1px;
+  min-width: 0.5px;
+  display: inline-block;
+  transition: height 0.2s ease, background-color 0.2s ease;
+}
+
+.controls-container {
+  width: 20%; /* Take up 20% of the .array-container */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-left: 10px;
+}
+button {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #282c34;
+  background-color: #61dafb;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #21a1f1;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:active {
+  background-color: #1e90ff;
+}
+
+input[type="range"] {
+  width: 200px;
+  margin: 20px 0;
 }
