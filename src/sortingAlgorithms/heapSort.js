@@ -1,42 +1,54 @@
 export function getHeapSortAnimations(array) {
-    const animations = [];
-    heapSortHelper(array, animations);
-    return animations;
+  const animations = [];
+  if (array.length <= 1) return array;
+
+  buildMaxHeap(array, animations);
+
+  for (let endIdx = array.length - 1; endIdx > 0; endIdx--) {
+      animations.push([0, endIdx, true]); // Highlight bars being compared
+      swap(0, endIdx, array);
+      siftDown(0, endIdx - 1, array, animations);
+      animations.push([0, endIdx, false]); // Revert colors
   }
-  
-  function heapSortHelper(array, animations) {
-    const length = array.length;
-    for (let i = Math.floor(length / 2) - 1; i >= 0; i--) {
-      heapify(array, length, i, animations);
-    }
-    for (let i = length - 1; i > 0; i--) {
-      animations.push([0, i]); // Highlight the elements being swapped
-      animations.push([0, i]); // Revert highlight
-      animations.push([0, array[i]]); // Swap animation
-      animations.push([i, array[0]]); // Swap animation
-      [array[0], array[i]] = [array[i], array[0]];
-      heapify(array, i, 0, animations);
-    }
+
+  return animations;
+}
+
+function buildMaxHeap(array, animations) {
+  const lastNonLeafIdx = Math.floor(array.length / 2) - 1;
+  for (let i = lastNonLeafIdx; i >= 0; i--) {
+      siftDown(i, array.length - 1, array, animations);
   }
-  
-  function heapify(array, length, rootIdx, animations) {
-    let largest = rootIdx;
-    const leftChild = 2 * rootIdx + 1;
-    const rightChild = 2 * rootIdx + 2;
-  
-    if (leftChild < length && array[leftChild] > array[largest]) {
-      largest = leftChild;
-    }
-    if (rightChild < length && array[rightChild] > array[largest]) {
-      largest = rightChild;
-    }
-    if (largest !== rootIdx) {
-      animations.push([rootIdx, largest]); // Highlight the elements being swapped
-      animations.push([rootIdx, largest]); // Revert highlight
-      animations.push([rootIdx, array[largest]]); // Swap animation
-      animations.push([largest, array[rootIdx]]); // Swap animation
-      [array[rootIdx], array[largest]] = [array[largest], array[rootIdx]];
-      heapify(array, length, largest, animations);
-    }
+}
+
+function siftDown(startIdx, endIdx, array, animations) {
+  let rootIdx = startIdx;
+
+  while (rootIdx <= endIdx) {
+      let leftChildIdx = rootIdx * 2 + 1;
+      let rightChildIdx = rootIdx * 2 + 2;
+      let swapIdx = rootIdx;
+
+      if (leftChildIdx <= endIdx && array[leftChildIdx] > array[swapIdx]) {
+          swapIdx = leftChildIdx;
+      }
+
+      if (rightChildIdx <= endIdx && array[rightChildIdx] > array[swapIdx]) {
+          swapIdx = rightChildIdx;
+      }
+
+      if (swapIdx !== rootIdx) {
+          animations.push([rootIdx, swapIdx, true]); // Highlight bars being compared
+          swap(rootIdx, swapIdx, array);
+          rootIdx = swapIdx;
+      } else {
+          return;
+      }
   }
-      
+}
+
+function swap(i, j, array) {
+  const temp = array[i];
+  array[i] = array[j];
+  array[j] = temp;
+}

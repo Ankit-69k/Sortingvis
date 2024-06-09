@@ -1,55 +1,50 @@
 export function getQuickSortAnimations(array) {
-    const animations = [];
-    if (array.length <= 1) return array;
-    const auxiliaryArray = array.slice();
-    quickSortHelper(array, 0, array.length - 1, auxiliaryArray, animations);
-    return animations;
-  }
-  
-  function partition(mainArray, startIdx, endIdx, auxiliaryArray, animations) {
-    const pivot = mainArray[endIdx];
-    let pivotIdx = startIdx;
-  
-    for (let i = startIdx; i < endIdx; i++) {
-      // Push animation to highlight comparison
-      animations.push([i, endIdx]);
-  
-      if (mainArray[i] <= pivot) {
-        // Push animations to represent swapping
-        animations.push([i, pivotIdx]);
-        animations.push([pivotIdx, i]);
-  
-        // Swap elements in auxiliaryArray
-        const temp = auxiliaryArray[i];
-        auxiliaryArray[i] = auxiliaryArray[pivotIdx];
-        auxiliaryArray[pivotIdx] = temp;
-  
-        pivotIdx++;
-      }
+  const animations = [];
+  if (array.length <= 1) return array;
+  const auxiliaryArray = array.slice();
+  quickSortHelper(array, 0, array.length - 1, auxiliaryArray, animations);
+  return animations;
+}
+
+function quickSortHelper(mainArray, startIdx, endIdx, auxiliaryArray, animations) {
+  if (startIdx >= endIdx) return;
+  const pivotIdx = startIdx;
+  let leftIdx = startIdx + 1;
+  let rightIdx = endIdx;
+
+  animations.push([pivotIdx, -1, -1, false]); // Mark pivot
+  while (rightIdx >= leftIdx) {
+    if (mainArray[leftIdx] > mainArray[pivotIdx] && mainArray[rightIdx] < mainArray[pivotIdx]) {
+      animations.push([pivotIdx, leftIdx, rightIdx, true]); // Swap bars
+      swap(leftIdx, rightIdx, mainArray);
     }
-  
-    // Push animations to highlight final pivot position
-    animations.push([pivotIdx, endIdx]);
-    animations.push([endIdx, pivotIdx]);
-  
-    // Swap pivot element with element at pivot index in auxiliaryArray
-    const temp = auxiliaryArray[pivotIdx];
-    auxiliaryArray[pivotIdx] = auxiliaryArray[endIdx];
-    auxiliaryArray[endIdx] = temp;
-  
-    // Copy auxiliaryArray back to mainArray
-    for (let i = startIdx; i <= endIdx; i++) {
-      mainArray[i] = auxiliaryArray[i];
+    if (mainArray[leftIdx] <= mainArray[pivotIdx]) {
+      animations.push([pivotIdx, leftIdx, rightIdx, false]); // Revert colors
+      leftIdx++;
     }
-  
-    return pivotIdx;
-  }
-  
-  function quickSortHelper(mainArray, startIdx, endIdx, auxiliaryArray, animations) {
-    if (startIdx < endIdx) {
-      const pivotIdx = partition(mainArray, startIdx, endIdx, auxiliaryArray, animations);
-      quickSortHelper(mainArray, startIdx, pivotIdx - 1, auxiliaryArray, animations);
-      quickSortHelper(mainArray, pivotIdx + 1, endIdx, auxiliaryArray, animations);
+    if (mainArray[rightIdx] >= mainArray[pivotIdx]) {
+      animations.push([pivotIdx, leftIdx, rightIdx, false]); // Revert colors
+      rightIdx--;
     }
   }
-  
+  animations.push([pivotIdx, -1, -1, false]); // Revert pivot color
+
+  animations.push([pivotIdx, pivotIdx, rightIdx, true]); // Swap pivot with rightIdx
+  swap(pivotIdx, rightIdx, mainArray);
+
+  const leftSubarrayIsSmaller = rightIdx - 1 - startIdx < endIdx - (rightIdx + 1);
+
+  if (leftSubarrayIsSmaller) {
+    quickSortHelper(mainArray, startIdx, rightIdx - 1, auxiliaryArray, animations);
+    quickSortHelper(mainArray, rightIdx + 1, endIdx, auxiliaryArray, animations);
+  } else {
+    quickSortHelper(mainArray, rightIdx + 1, endIdx, auxiliaryArray, animations);
+    quickSortHelper(mainArray, startIdx, rightIdx - 1, auxiliaryArray, animations);
+  }
+}
+
+function swap(i, j, array) {
+  const temp = array[i];
+  array[i] = array[j];
+  array[j] = temp;
+}
